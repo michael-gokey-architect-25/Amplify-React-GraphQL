@@ -1,0 +1,58 @@
+# GraphQL Schema for Notes App
+# This file defines the data model for our application
+
+type Note @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Additional models can be added here
+# Example: Categories for organizing notes
+type Category @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  description: String
+  notes: [Note] @hasMany
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Example: Tags for labeling notes
+type Tag @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  name: String!
+  color: String
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Many-to-many relationship between Notes and Tags
+type NoteTag @model @auth(rules: [{ allow: owner }]) {
+  id: ID!
+  noteId: ID! @index(name: "byNote")
+  tagId: ID! @index(name: "byTag")
+  note: Note @belongsTo(fields: ["noteId"])
+  tag: Tag @belongsTo(fields: ["tagId"])
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+# Custom queries and mutations can be defined here
+# Example: Search functionality
+type Query {
+  searchNotes(filter: String!): [Note] @auth(rules: [{ allow: owner }])
+}
+
+# Example: Custom mutation for bulk operations
+type Mutation {
+  createMultipleNotes(notes: [CreateNoteInput!]!): [Note] @auth(rules: [{ allow: owner }])
+}
+
+# Input types for custom operations
+input CreateNoteInput {
+  name: String!
+  description: String
+}
